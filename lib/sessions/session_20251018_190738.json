@@ -1,0 +1,29 @@
+{
+  "id": "20251018_190732",
+  "target": "../binaries/vault",
+  "timestamp": "2025-10-18T17:07:32Z",
+  "args": [],
+  "env": {},
+  "inputs": [
+    {
+      "t": 3.531963078999979,
+      "data": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+    }
+  ],
+  "outputs": [
+    {
+      "t": 0.0035975749997305684,
+      "data": "Vault 713 - Inserire codice di sblocco: "
+    },
+    {
+      "t": 3.532096627000101,
+      "data": "\n[+] Accesso Premium Sbloccato! Benvenuto.\n"
+    }
+  ],
+  "exit_code": -11,
+  "error": null,
+  "metadata": {
+    "python_version": "3.13.7",
+    "platform": "Linux-6.16.10-100.fc41.x86_64-x86_64-with-glibc2.40"
+  }
+}

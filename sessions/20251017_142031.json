@@ -1,0 +1,22 @@
+{
+  "id": "20251017_142031",
+  "timestamp": "2025-10-17T14:20:31.859659+00:00Z",
+  "target": "binaries/vault",
+  "inputs": [
+    {
+      "t": 7.5432,
+      "data": "ciao\n"
+    }
+  ],
+  "outputs": [
+    {
+      "t": 0.0,
+      "data": "Vault 713 - Inserire codice di sblocco: "
+    },
+    {
+      "t": 7.5434,
+      "data": "\n[!] Codice non valido. Accesso negato.\n"
+    }
+  ],
+  "exit_code": 0
+}
