@@ -1,0 +1,45 @@
+{
+  "id": "20260218_174053",
+  "target": "binaries/ctf",
+  "timestamp": "2026-02-18T16:40:53Z",
+  "args": [],
+  "env": {},
+  "inputs": [
+    {
+      "t": 1.3406503800006249,
+      "data": "ciao\n"
+    },
+    {
+      "t": 2.5376686790004896,
+      "data": "ciao\n"
+    },
+    {
+      "t": 8.854514325999844,
+      "data": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n"
+    }
+  ],
+  "outputs": [
+    {
+      "t": 0.004446839000593172,
+      "data": "Ciao\r\n"
+    },
+    {
+      "t": 1.3406793000003745,
+      "data": "I guess you're not cool enough to see my secret\r\n"
+    },
+    {
+      "t": 2.5377043290000074,
+      "data": "I guess you're not cool enough to see my secret\r\n"
+    },
+    {
+      "t": 8.854569475000062,
+      "data": "Wow! Here's a secret.\r\n"
+    }
+  ],
+  "exit_code": -11,
+  "error": null,
+  "metadata": {
+    "python_version": "3.14.2",
+    "platform": "Linux-6.18.9-200.fc43.x86_64-x86_64-with-glibc2.42"
+  }
+}

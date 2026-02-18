@@ -1,7 +1,12 @@
 import os
-from utilities import resolve_binary_path
-from pwn import process
-import logger
+import sys
+import select
+import termios
+import shutil
+from .utilities import resolve_binary_path
+from pwn import *
+import pty
+from .logger import SessionLogger
 
 
 # --- FUNZIONE PER INTERAGIRE E REGISTRARE ---
@@ -10,7 +15,7 @@ def run_and_record(binary_path):
     Avvia un binario locale, permette l'interazione e salva un log della sessione.
     """
     # 1. PREPARAZIONE DEL LOGGER
-    session = logger.SessionLogger(
+    session = SessionLogger(
             binary_path=binary_path
     )
     
@@ -27,30 +32,63 @@ def run_and_record(binary_path):
 
     # 3. ESECUZIONE DEL PROCESSO
     p = None
+    master = None
     try:
-        p = process([binary_real])
+        master, slave = pty.openpty()
+
+        # Disabilita l'eco sul lato slave del pty facendo un and con
+        # la maschera di termios.ECHO annullata dal bitwise NOT ~
+        attrs = termios.tcgetattr(slave)
+        attrs[3] = attrs[3] & ~termios.ECHO
+        termios.tcsetattr(slave, termios.TCSANOW, attrs)
+
+        # Forza il binario ad avere stdout/stderr non bufferizzati
+        # se 'stdbuf' è disponibile sul sistema.
+        cmd = [binary_real]
+        stdbuf_path = shutil.which("stdbuf")
+        if stdbuf_path is not None:
+            cmd = [stdbuf_path, "-i0", "-o0", "-e0", binary_real]
+
+        p = process(cmd, stdin=slave, stdout=slave, stderr=slave)
+        os.close(slave)
+
         print(f"[*] Processo '{binary_path}' avviato. Inserisci i comandi e premi Invio. Premi Ctrl+D per finire.")
 
-        # Leggi e registra l'output iniziale
-        initial_output = p.recv().decode(errors='ignore')
-        if initial_output:
-            print(initial_output, end='')
-            session.record_output(initial_output.encode())
-            # log_data["outputs"].append({"t": 0.0, "data": initial_output})
-        
-        # 3. CICLO DI INTERAZIONE
-        while p.poll() is None:
-            try:
-                user_input = input().encode()
-                p.sendline(user_input)
-                session.record_input(user_input + b'\n')
+        # 3.1 CICLO DI INTERAZIONE BASATO SU SELECT
+        #     Usiamo select su stdin e sul master del pty:
+        #     - se arriva output dal binario, lo stampiamo subito
+        #     - se l'utente digita qualcosa, lo inoltriamo al binario
+        stdin_fd = sys.stdin.fileno()
+        fds = [master, stdin_fd]
 
-                response = p.recv().decode(errors='ignore')
-                print(response, end='')
-                session.record_output(response.encode())
-            except EOFError:
-                print("\n[*] Sessione terminata dall'utente.")
-                break
+        while True:
+            # Lista per vedere quali processi sono pronti per la lettura
+            rlist, _, _ = select.select(fds, [], [])
+
+            # Output dal binario
+            if master in rlist:
+                try:
+                    data = os.read(master, 4096)
+                    if not data:
+                        break
+                    sys.stdout.buffer.write(data)
+                    sys.stdout.buffer.flush()
+                    session.record_output(data)
+                except OSError:
+                    break
+            # Input dall'utente
+            if stdin_fd in rlist:
+                try:
+                    user_bytes = os.read(stdin_fd, 4096)
+                except OSError:
+                    user_bytes = b""
+
+                if not user_bytes:
+                    print("\n[*] Sessione terminata dall'utente.")
+                    break
+
+                os.write(master, user_bytes)
+                session.record_input(user_bytes)
     
     finally:
         # 4. SALVATAGGIO

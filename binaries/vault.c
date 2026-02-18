@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-
 int main() {
     // Variabili memorizzate una dopo l'altra nello stack
     char pincode[16];
@@ -17,11 +16,10 @@ int main() {
     gets(pincode);
 
     // Controlla se la variabile `premium_access` è stata modificata
-    if (premium_access != 0) {
-        printf("\n[+] Accesso Premium Sbloccato! Benvenuto.\n");
-    } else {
+    while (premium_access == 0) {
         printf("\n[!] Codice non valido. Accesso negato.\n");
-    }
-
+        gets(pincode);
+	}
+    printf("\n[+] Accesso Premium Sbloccato! Benvenuto.\n");
     return 0;
 }

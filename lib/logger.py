@@ -3,7 +3,7 @@ import platform
 import time
 from typing import Any, Dict, List, Optional
 
-from utilities import atomic_write_json, monotonic_s, next_session_filename 
+from .utilities import atomic_write_json, monotonic_s, next_session_filename 
 
 
 class SessionLogger:
