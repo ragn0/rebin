@@ -33,23 +33,35 @@ def replay_session(log_filename):
         print("[!] Errore: Il file di log non specifica un 'target'.")
         return
 
-    # Risolvi path come in run_and_record
-    binary_real = resolve_binary_path(binary_path)
+    # Se presente, usa la lista args registrata (es. sessioni avviate con gdb).
+    # Altrimenti fallback al solo target (compatibilità con log vecchi).
+    cmd = log_data.get("args") or []
+    cmd = list(cmd) if isinstance(cmd, list) else []
 
-    if not os.path.isfile(binary_real):
-        print(f"[!] Errore: Il binario per il replay '{binary_path}' non esiste (risolto in '{binary_real}').")
-        return
-    if not os.access(binary_real, os.X_OK):
-        print(f"[!] Errore: Il file '{binary_real}' non è eseguibile (chmod +x).")
-        return
+    if not cmd:
+        binary_real = resolve_binary_path(binary_path)
+        if not os.path.isfile(binary_real):
+            print(f"[!] Errore: Il binario per il replay '{binary_path}' non esiste (risolto in '{binary_real}').")
+            return
+        if not os.access(binary_real, os.X_OK):
+            print(f"[!] Errore: Il file '{binary_real}' non è eseguibile (chmod +x).")
+            return
+
+        # Usa stdbuf per forzare stdout/stderr non bufferizzati
+        cmd = [binary_real]
+        stdbuf_path = shutil.which("stdbuf")
+        if stdbuf_path is not None:
+            cmd = [stdbuf_path, "-i0", "-o0", "-e0", binary_real]
+    else:
+        # Best-effort: se l'ultimo argomento sembra un path relativo al binario,
+        # risolvilo rispetto al progetto.
+        last = cmd[-1]
+        if isinstance(last, str) and not os.path.isabs(last):
+            resolved_last = resolve_binary_path(last)
+            if os.path.isfile(resolved_last):
+                cmd[-1] = resolved_last
 
     master, slave = pty.openpty()
-
-    # Usa stdbuf per forzare stdout/stderr non bufferizzati
-    cmd = [binary_real]
-    stdbuf_path = shutil.which("stdbuf")
-    if stdbuf_path is not None:
-        cmd = [stdbuf_path, "-i0", "-o0", "-e0", binary_real]
 
     p = process(cmd, stdin=slave, stdout=slave, stderr=slave)
     os.close(slave)

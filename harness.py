@@ -1,10 +1,7 @@
 import argparse
-import json
-from datetime import datetime, timezone
-import time
+from pwn import context
 import os
-from pwn import process, context
-from lib.run import run_and_record
+from lib.run import gdb_and_record, run_and_record
 from lib.replay import replay_session
 # Rende l'output di pwntools meno verboso
 context.log_level = "error"
@@ -18,6 +15,10 @@ if __name__ == "__main__":
     parser_run = subparsers.add_parser('run', help='Avvia una sessione interattiva e la registra.')
     parser_run.add_argument('binary', help='Path del binario da eseguire.')
 
+    # Comando 'gdb' per interagire e registrare tramite gdb
+    parser_gdb = subparsers.add_parser('gdb', help='Avvia gdb su un binario e registra la sessione (I/O di gdb + programma).')
+    parser_gdb.add_argument('binary', help='Path del binario da eseguire sotto gdb.')
+
     # Comando 'replay' per rigiocare una sessione
     parser_replay = subparsers.add_parser('replay', help='Riproduce una sessione da un file di log.')
     parser_replay.add_argument('logfile', help='Path del file di log JSON da rigiocare.')
@@ -27,6 +28,9 @@ if __name__ == "__main__":
     # Esegui il comando scelto
     if args.command == 'run':
         run_and_record(args.binary)
+
+    elif args.command == 'gdb':
+        gdb_and_record(args.binary)
 
     elif args.command == 'replay':
         replay_session(args.logfile)

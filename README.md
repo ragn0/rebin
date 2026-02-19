@@ -10,12 +10,19 @@ Tool Python per **interagire con un binario**, registrare **input/output** in un
 
 ### Come si usa
 
-Il programma principale è `harness.py` e supporta due comandi:
+Il programma principale è `harness.py` e supporta tre comandi:
 
 - **play/record (run)**: avvia il binario in un pseudo-terminale, lascia interagire l’utente e salva un log JSON.
 
 ```bash
 python3 harness.py run <path_al_binario>
+```
+
+- **debug (gdb)**: avvia `gdb` sul binario e registra una sessione interattiva.  
+  Il log cattura **sia l’I/O di gdb che quello del programma in debug** (passano dalla stessa PTY).
+
+```bash
+python3 harness.py gdb <path_al_binario>
 ```
 
 - **replay**: rilegge un file JSON e reinvia gli input registrati, mostrando l’output risultante.
