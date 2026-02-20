@@ -1,6 +1,6 @@
 #include <stdio.h>
-
-
+#include <stdlibi.h>
+#include <unistd.h>
 
 int main() {
     int secret = 0xdeadbeef;
